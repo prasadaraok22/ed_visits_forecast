@@ -13,11 +13,9 @@ class EDVisitForecaster:
         self.scaler = MinMaxScaler(feature_range=(0, 1))
         self.model = None
 
-
     def prepare_data(self, data_path):
-        with open(data_path, 'r') as f:
-            data = json.load(f)
-        df = pd.DataFrame(data)
+        print("CSV data loading....")
+        df = pd.read_csv(data_path)
         print(df.head())
         # Select only numeric columns for scaling
         numeric_df = df.select_dtypes(include=[np.number])
@@ -42,6 +40,7 @@ class EDVisitForecaster:
             Dense(1)
         ])
         model.compile(optimizer='adam', loss='mse', metrics=['mae'])
+
         self.model = model
         return model
 
@@ -61,7 +60,7 @@ class EDVisitForecaster:
         joblib.dump(self.scaler, scaler_path)
 
     def load_artifacts(self, model_path='ed_model.h5', scaler_path='scaler.pkl'):
-        self.model = tf.keras.models.load_model(model_path)
+        self.model = tf.keras.models.load_model(model_path, compile=False)
         self.scaler = joblib.load(scaler_path)
 
     def predict_next_hour(self, last_window):
